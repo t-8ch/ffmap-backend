@@ -62,12 +62,15 @@ def mark_uplinks(nodeinfo, node):
 
 def mark_fastd_uplinks(nodeinfo, node):
         try:
-            backbone_peers = nodeinfo['statistics']['mesh_vpn']['groups']['backbone']['peers']
+            for group in nodeinfo['statistics']['mesh_vpn']['groups'].values():
+                for peer in group['peer']:
+                    if peer['established']:
+                        node['flags']['uplink'] = True
+                        return
         except KeyError:
-            backbone_peers = []
+            pass
 
-        node['flags']['uplink'] = any(map(
-            lambda peer: peer.get('established', False), backbone_peers))
+        node['flags']['uplink'] = False
 
 
 def import_nodeinfo(nodes, nodeinfos, now, assume_online=False):
