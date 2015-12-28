@@ -93,6 +93,7 @@ def import_statistics(nodes, stats):
             lambda d: 1 - d['free'] / d['total'])
         add(node, stats, 'rootfs_usage', ['rootfs_usage'])
         add(node, stats, 'traffic', ['traffic'])
+        add(node, stats, 'mesh_vpn', ['mesh_vpn'])
 
 
 def import_mesh_ifs_vis_data(nodes, vis_data):
