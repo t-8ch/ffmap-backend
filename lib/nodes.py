@@ -171,7 +171,7 @@ def import_vis_clientcount(nodes, vis_data):
         nodes[node_id]['statistics'].setdefault('clients', clientcount)
 
 
-def uplink(nodes, gateways):
+def mark_gateways(nodes, gateways):
     macs = build_mac_table(nodes)
     gateways = filter(lambda d: d in macs, gateways)
 
