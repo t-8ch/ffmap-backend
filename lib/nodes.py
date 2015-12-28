@@ -56,12 +56,28 @@ def mark_online(node, now):
     node['flags']['online'] = True
 
 
+def mark_uplinks(nodeinfo, node):
+    mark_fastd_uplinks(nodeinfo, node)
+
+
+def mark_fastd_uplinks(nodeinfo, node):
+        try:
+            backbone_peers = nodeinfo['statistics']['mesh_vpn']['groups']['backbone']['peers']
+        except KeyError:
+            backbone_peers = []
+
+        node['flags']['uplink'] = any(map(
+            lambda peer: peer.get('established', False), backbone_peers))
+
+
 def import_nodeinfo(nodes, nodeinfos, now, assume_online=False):
     for nodeinfo in filter(lambda d: 'node_id' in d, nodeinfos):
         node = nodes.setdefault(nodeinfo['node_id'], {'flags': dict()})
         node['nodeinfo'] = nodeinfo
         node['flags']['online'] = False
         node['flags']['gateway'] = False
+
+        mark_uplinks(nodeinfo, node)
 
         if assume_online:
             mark_online(node, now)
@@ -93,7 +109,6 @@ def import_statistics(nodes, stats):
             lambda d: 1 - d['free'] / d['total'])
         add(node, stats, 'rootfs_usage', ['rootfs_usage'])
         add(node, stats, 'traffic', ['traffic'])
-        add(node, stats, 'mesh_vpn', ['mesh_vpn'])
 
 
 def import_mesh_ifs_vis_data(nodes, vis_data):
@@ -153,7 +168,7 @@ def import_vis_clientcount(nodes, vis_data):
         nodes[node_id]['statistics'].setdefault('clients', clientcount)
 
 
-def mark_gateways(nodes, gateways):
+def uplink(nodes, gateways):
     macs = build_mac_table(nodes)
     gateways = filter(lambda d: d in macs, gateways)
 
